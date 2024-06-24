@@ -1,0 +1,15 @@
+{application, rebar3_sqlc, [
+    {description, "A rebar3 plugin for compiling .sql SQL modules"},
+    {vsn, git},
+    {applications, [
+        kernel,
+        stdlib,
+
+        sqlc
+    ]},
+    {env,[]},
+    {modules, []},
+
+    {licenses, ["Apache-2.0"]},
+    {links, []}
+]}.
