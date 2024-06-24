@@ -28,17 +28,31 @@ init(State) ->
 
 -spec do(rebar_state:t()) -> {ok, rebar_state:t()} | {error, string()}.
 do(State) ->
-    rebar_api:info("Running sqlc...", []),
-    lists:foreach(fun (App) ->
-        Opts = rebar_app_info:opts(App),
-        SourceDirs = rebar_dir:src_dirs(rebar_app_info:opts(App)),
-        lists:foreach(fun (SourceDir) ->
-            rebar_base_compiler:run(Opts, [], SourceDir, ".sql", SourceDir, ".erl", fun compile/3)
-        end, SourceDirs)
-    end, rebar_state:project_apps(State)).
+    rebar_api:warn("Running sqlc...", []),
+    Apps = case rebar_state:current_app(State) of
+        undefined -> rebar_state:project_apps(State);
+        App -> [App]
+    end,
+    {ok, lists:foldl(fun (App, StateAcc) ->
+        compile_app(App, StateAcc)
+    end, State, Apps)}.
 
 
-compile(Source, Target, Options) ->
+compile_app(App, State) ->
+    Opts = rebar_app_info:opts(App),
+    AppDir = rebar_app_info:dir(App),
+    SourceDirs = rebar_dir:src_dirs(rebar_app_info:opts(App)),
+    lists:foreach(fun (SourceDir0) ->
+        SourceDir = filename:join(AppDir, SourceDir0),
+        rebar_api:debug("Compiling sqlc in dir: ~s", [SourceDir]),
+        rebar_base_compiler:run(Opts, [], SourceDir, ".sql", SourceDir, ".erl", fun compile/3, [{check_last_mod, false}])
+    end, SourceDirs),
+    State.
+
+
+compile(Source, _Target, Options) ->
+    Target = filename:rootname(Source) ++ ".erl",
+    rebar_api:debug("Compiling sqlc: ~s to ~s", [Source, Target]),
     case sqlc:file(Source) of
         {ok, Module} ->
             case rebar_file_utils:write_file_if_contents_differ(Target, sqlc_module:to_erl(Module), utf8) of
