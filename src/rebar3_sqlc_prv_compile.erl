@@ -59,14 +59,15 @@ compile(Source, _Target, Options) ->
                 ok ->
                     rebar_base_compiler:ok_tuple(Source, []);
                 {error, Error} ->
-                    Message = file:format_error(Error),
-                    rebar_base_compiler:error_tuple(Target, [Message], [], Options)
+                    rebar_base_compiler:error_tuple(Source, [{Target, [{file, Error}]}], [], Options)
             end;
-        {error, #{message := Message}} ->
-            rebar_base_compiler:error_tuple(Source, [Message], [], Options)
+        {error, #{line := Line} = Error} ->
+            rebar_base_compiler:error_tuple(Source, [{Source, [{Line, ?MODULE, Error}]}], [], Options)
     end.
 
 
--spec format_error(any()) ->  iolist().
+-spec format_error(any()) -> iolist().
+format_error(#{message := Message}) ->
+    Message;
 format_error(Reason) ->
     io_lib:format("~p", [Reason]).
