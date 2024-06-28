@@ -41,7 +41,7 @@ do(State) ->
 compile_app(App, State) ->
     Opts = rebar_app_info:opts(App),
     AppDir = rebar_app_info:dir(App),
-    SourceDirs = rebar_dir:src_dirs(rebar_app_info:opts(App)),
+    SourceDirs = rebar_dir:all_src_dirs(rebar_app_info:opts(App), ["src"], []),
     lists:foreach(fun (SourceDir0) ->
         SourceDir = filename:join(AppDir, SourceDir0),
         rebar_api:debug("Compiling sqlc in dir: ~s", [SourceDir]),
