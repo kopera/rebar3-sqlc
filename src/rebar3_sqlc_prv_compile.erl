@@ -62,7 +62,9 @@ compile(Source, _Target, Options) ->
                     rebar_base_compiler:error_tuple(Source, [{Target, [{file, Error}]}], [], Options)
             end;
         {error, #{line := Line} = Error} ->
-            rebar_base_compiler:error_tuple(Source, [{Source, [{Line, ?MODULE, Error}]}], [], Options)
+            rebar_base_compiler:error_tuple(Source, [{Source, [{Line, ?MODULE, Error}]}], [], Options);
+        {error, Error} ->
+            rebar_base_compiler:error_tuple(Source, [{Source, [{?MODULE, Error}]}], [], Options)
     end.
 
 
