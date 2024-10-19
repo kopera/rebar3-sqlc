@@ -1,6 +1,6 @@
 {application, rebar3_sqlc, [
     {description, "A rebar3 plugin for compiling .sql SQL modules"},
-    {vsn, git},
+    {vsn, "0.1.0"},
     {applications, [
         kernel,
         stdlib,

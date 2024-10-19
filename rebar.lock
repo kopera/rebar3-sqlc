@@ -1,0 +1,8 @@
+{"1.2.0",
+[{<<"sqlc">>,{pkg,<<"sqlc">>,<<"0.1.0">>},0}]}.
+[
+{pkg_hash,[
+ {<<"sqlc">>, <<"8A8EC4D3E7CECE25521E819500AD97E625A75D73C8878F49B7C46FA247F3CAA2">>}]},
+{pkg_hash_ext,[
+ {<<"sqlc">>, <<"875C55A1D2396AFE75FF0D45E41CF7EB36002D0B61FCF5DE0BC6B75BFEC40AEA">>}]}
+].
