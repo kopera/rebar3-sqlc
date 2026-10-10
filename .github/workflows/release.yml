@@ -7,10 +7,6 @@ on:
         description: Version to release, without the leading v (for example 0.2.0)
         required: true
         type: string
-      sqlc-version:
-        description: Version of sqlc that the release depends on (for example 0.1.1)
-        required: true
-        type: string
       author-name:
         description: Name of the author of the release commits
         required: true
@@ -32,7 +28,6 @@ jobs:
 
     env:
       VERSION: ${{ inputs.version }}
-      SQLC_VERSION: ${{ inputs.sqlc-version }}
       AUTHOR_NAME: ${{ inputs.author-name }}
       AUTHOR_EMAIL: ${{ inputs.author-email }}
 
@@ -41,10 +36,6 @@ jobs:
         run: |
           if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
             echo "::error::'$VERSION' is not a valid version"
-            exit 1
-          fi
-          if [[ ! "$SQLC_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
-            echo "::error::'$SQLC_VERSION' is not a valid version"
             exit 1
           fi
           if [[ ! "$AUTHOR_EMAIL" =~ ^[^[:space:]@]+@[^[:space:]@]+$ ]]; then
@@ -72,17 +63,10 @@ jobs:
           mkdir -p ~/.config/rebar3/
           echo "{plugins, [rebar3_hex]}." >> ~/.config/rebar3/rebar.config
 
-      - name: Set the version in the manifest and depend on the Hex package
+      - name: Set the version in the manifest
         run: |
           sed -i "s/{vsn, git}/{vsn, \"$VERSION\"}/" src/rebar3_sqlc.app.src
           grep -q "{vsn, \"$VERSION\"}" src/rebar3_sqlc.app.src
-          sed -i "s|{sqlc, {git, \"https://github.com/kopera/erlang-sqlc\", {branch, \"main\"}}}|{sqlc, \"$SQLC_VERSION\"}|" rebar.config
-          grep -q "{sqlc, \"$SQLC_VERSION\"}" rebar.config
-
-      - name: Lock the dependencies
-        run: |
-          rm -f rebar.lock
-          rebar3 compile
 
       - name: Run unit tests
         run: rebar3 eunit
@@ -129,7 +113,5 @@ jobs:
       - name: Post release version bump
         run: |
           sed -i "s/{vsn, \"$VERSION\"}/{vsn, git}/" src/rebar3_sqlc.app.src
-          sed -i "s|{sqlc, \"$SQLC_VERSION\"}|{sqlc, {git, \"https://github.com/kopera/erlang-sqlc\", {branch, \"main\"}}}|" rebar.config
-          git rm --quiet rebar.lock
           git commit --all --message "Post release version bump"
           git push origin HEAD:main
